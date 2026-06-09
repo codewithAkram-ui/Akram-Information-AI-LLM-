@@ -1,7 +1,3 @@
-"""
-Vector Store — Embeds text chunks and searches with FAISS.
-Uses NVIDIA GPU if available for faster embedding generation.
-"""
 
 import os
 import pickle
