@@ -5,11 +5,9 @@ from openai import OpenAI
 
 
 class GrokGenerator:
-    """Answer generator using Groq's lightning fast API."""
 
     def __init__(self, api_key: str = None):
-        # We still use GROK_API_KEY from .env since that's what's in the file, 
-        # but we point it to the Groq servers!
+        
         self.api_key = api_key or os.getenv("GROK_API_KEY")
 
         if not self.api_key:
@@ -28,9 +26,7 @@ class GrokGenerator:
         print(f"🤖 Groq API initialized (model: {self.model})")
 
     def generate_answer(self, question: str, context_chunks: list[dict]) -> dict:
-        """
-        Generate an answer using Groq API with retrieved context.
-        """
+        
         # Build context from retrieved chunks
         context_parts = []
         for i, chunk in enumerate(context_chunks):
