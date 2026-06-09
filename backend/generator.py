@@ -1,7 +1,4 @@
-"""
-Generator — Uses Groq API to generate answers from retrieved context.
-Groq API is OpenAI-compatible, so we use the openai Python client.
-"""
+
 
 import os
 from openai import OpenAI
@@ -48,7 +45,7 @@ You answer questions ONLY based on the provided context from Akram's personal do
 
 Rules:
 1. Answer ONLY based on the provided context. Do not make up information.
-2. If the context doesn't contain enough information to answer, say "I don't have enough information about that in my knowledge base."
+2. If the context doesn't contain enough information to answer, say "I don't have enough information about this sorry."
 3. Be conversational, friendly, and speak in third person about Akram (e.g., "Akram is..." or "He studied...").
 4. Keep answers concise but informative.
 5. If asked who you are, say you're AkramAI — a personal AI assistant built to share information about Akram Ali Faridi.
@@ -88,8 +85,14 @@ Please provide an accurate answer based on the context above."""
             }
 
         except Exception as e:
+            error_msg = str(e).lower()
+            if "413" in error_msg or "429" in error_msg or "rate limit" in error_msg or "limit" in error_msg or "tokens" in error_msg:
+                answer = "enough for today"
+            else:
+                answer = f"I encountered an error while generating a response. Please try again. Error: {str(e)}"
+                
             return {
-                "answer": f"I encountered an error while generating a response. Please try again. Error: {str(e)}",
+                "answer": answer,
                 "confidence": 0,
                 "sources_used": 0,
                 "model": "Groq Error"
