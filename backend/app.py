@@ -1,8 +1,3 @@
-"""
-AkramAI — Flask API Server
-Personal AI Knowledge Assistant powered by RAG + Grok API
-"""
-
 import os
 import sys
 from dotenv import load_dotenv
@@ -103,6 +98,12 @@ def health():
     })
 
 
+@app.route("/")
+def serve_vue_app():
+    """Serve the Vue frontend."""
+    return send_from_directory(app.static_folder, "index.html")
+
+
 @app.route("/api/ask", methods=["POST"])
 def ask():
     """Main Q&A endpoint."""
@@ -170,6 +171,8 @@ def reindex():
 
 # ─── Startup ──────────────────────────────────────────────
 
+# Call initialize automatically when app is loaded (crucial for Gunicorn)
+initialize()
+
 if __name__ == "__main__":
-    initialize()
     app.run(host="0.0.0.0", port=5000, debug=False)
