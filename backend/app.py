@@ -3,8 +3,18 @@ AkramAI — Flask API Server
 Personal AI Knowledge Assistant powered by RAG + Grok API
 """
 
+# ─── Memory Optimization (MUST be before all other imports) ───────────────────
 import os
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+os.environ["PYTORCH_NO_CUDA_MEMORY_CACHING"] = "1"
+# ──────────────────────────────────────────────────────────────────────────────
+
 import sys
+import time
+import threading
+import requests as req_lib
 from dotenv import load_dotenv
 
 # Load .env file from the backend directory
@@ -12,7 +22,7 @@ env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
 load_dotenv(env_path, override=True)
 print(f"📋 Loaded .env from: {env_path}")
 print(f"🔑 GROK_API_KEY: {'✅ Found' if os.getenv('GROK_API_KEY') else '❌ Not found'}")
-import time
+
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
@@ -28,6 +38,25 @@ vector_store = None
 generator = None
 is_ready = False
 startup_error = None
+
+
+def keep_alive():
+    """Ping own health endpoint every 14 min to prevent Render free tier spin-down."""
+    # Wait for app to fully initialize before starting pings
+    time.sleep(60)
+    render_url = os.getenv("RENDER_EXTERNAL_URL", "")
+    if not render_url:
+        print("⚠️  RENDER_EXTERNAL_URL not set — keep-alive disabled")
+        return
+    ping_url = f"{render_url}/api/health"
+    print(f"🔁 Keep-alive started → pinging {ping_url} every 14 min")
+    while True:
+        time.sleep(840)  # 14 minutes
+        try:
+            res = req_lib.get(ping_url, timeout=10)
+            print(f"🔁 Keep-alive ping → {res.status_code}")
+        except Exception as e:
+            print(f"⚠️  Keep-alive ping failed: {e}")
 
 
 def initialize():
@@ -60,10 +89,10 @@ def initialize():
         else:
             print("📄 Extracting text from:", pdf_path)
             chunks = process_pdf(pdf_path)
-            
+
             print(f"🔢 Building vector index...")
             vector_store.build_index(chunks)
-            
+
             # Save for next time
             vector_store.save(index_dir)
 
@@ -101,7 +130,6 @@ def health():
         "gpu": "cuda" if vector_store and vector_store.device == "cuda" else "cpu",
         "chunks_indexed": vector_store.index.ntotal if vector_store and vector_store.index else 0
     })
-
 
 
 @app.route("/api/ask", methods=["POST"])
@@ -173,6 +201,9 @@ def reindex():
 
 # Call initialize automatically when app is loaded (crucial for Gunicorn)
 initialize()
+
+# Start keep-alive thread to prevent Render free tier spin-down
+threading.Thread(target=keep_alive, daemon=True).start()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
