@@ -1,3 +1,7 @@
+"""
+AkramAI — Flask API Server
+Personal AI Knowledge Assistant powered by RAG + Grok API
+"""
 
 import os
 import sys
@@ -98,11 +102,6 @@ def health():
         "chunks_indexed": vector_store.index.ntotal if vector_store and vector_store.index else 0
     })
 
-
-@app.route("/")
-def serve_vue_app():
-    """Serve the Vue frontend."""
-    return send_from_directory(app.static_folder, "index.html")
 
 
 @app.route("/api/ask", methods=["POST"])
