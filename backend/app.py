@@ -1,7 +1,3 @@
-"""
-AkramAI — Flask API Server
-Personal AI Knowledge Assistant powered by RAG + Grok API
-"""
 
 # ─── Memory Optimization (MUST be before all other imports) ───────────────────
 import os
@@ -130,6 +126,7 @@ def health():
         "gpu": "cuda" if vector_store and vector_store.device == "cuda" else "cpu",
         "chunks_indexed": vector_store.index.ntotal if vector_store and vector_store.index else 0
     })
+
 
 
 @app.route("/api/ask", methods=["POST"])
