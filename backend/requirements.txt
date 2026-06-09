@@ -1,3 +1,5 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+
 flask==3.1.1
 flask-cors==5.0.1
 PyPDF2==3.0.1
@@ -5,6 +7,6 @@ sentence-transformers==3.4.1
 faiss-cpu==1.13.2
 openai==1.82.0
 numpy==2.2.6
-torch==2.9.0
+torch==2.9.0+cpu
 gunicorn==22.0.0
 python-dotenv==1.0.1
