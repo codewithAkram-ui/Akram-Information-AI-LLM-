@@ -22,7 +22,7 @@ class GrokGenerator:
         )
 
         # Using Llama 3.1 8B Instant since Versatile is not preferred
-        self.model = "llama-3.1-8b-instant"
+        self.model = "openai/gpt-oss-20b"
         print(f"🤖 Groq API initialized (model: {self.model})")
 
     def generate_answer(self, question: str, context_chunks: list[dict]) -> dict:
